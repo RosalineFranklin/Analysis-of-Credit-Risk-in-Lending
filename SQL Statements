@@ -1,0 +1,41 @@
+For this project, I ran several queries to get different tables to use within Power BI for uncovering insights.
+
+--The first table--
+SELECT
+Count(*) as total_applicants, --Our data did not have an index
+YEAR(ApplicationDate) AS _year, --We formatted the date to show just the year
+CASE --Right now the LoanApproved column just gives us a 1 or a 0 so we are adding wording to it
+	WHEN LoanApproved = 1 then 'Approved' --Each instance of '1' found in our data returns 'Approved' in the row
+	ELSE 'Declined' --Any other number found in our data returns 'Declined'
+END AS approval_status,
+ROUND(AVG(age),2) as avg_age, --Averageing and rounding the age column
+ROUND(AVG(AnnualIncome),2) as avg_income, --Averageing and rounding the income column
+ROUND(AVG(TotalAssets),2) as avg_assets,--Averageing and rounding the assets column
+ROUND(AVG(TotalLiabilities),2) as avg_liabilities, --Averageing and rounding the liabilities column
+ROUND(AVG(SavingsAccountBalance),2) as avg_savings, --Averageing and rounding the savings column
+ROUND(AVG(JobTenure),2) as avg_jobtenure, --Averageing and rounding the job tenure column
+ROUND(AVG(TotalDebtToIncomeRatio),2) as avg_debtincomeratio --Averageing and rounding the debt to income column
+from Loan_financial_risk
+GROUP BY YEAR(ApplicationDate), LoanApproved
+ORDER BY YEAR(ApplicationDate);
+
+--The second table--
+SELECT
+YEAR(ApplicationDate) AS _Year, --We formatted the date to show just the year
+AVG(age) AS Average_Age, --Average age not rounded
+EmploymentStatus, --Clien employment status
+CASE 
+	WHEN LoanApproved = 0 THEN 'Approved' --Case statement that indicated when a client had a 0 under "LoanApproved" then it return Approved
+	ELSE 'Declined' --Case statement that returned Declined for any other result.
+END AS Applicaton_Status,
+AVG(CreditScore) As ScoreNumber, --Average Credit Score
+CASE
+	WHEN CreditScore between 0 and 400 then 'Low Credit' --I wanted to create categories for credit and so this range would return Low Credit
+	WHEN CreditScore between 401 and 600 then 'Good Credit' --This range returns Good Credit
+	When CreditScore > 600 then 'Excellent Credit' --This range returns Excellent Credit
+	Else 'No Credit Found' --any other data in this field would return with No Credit Found
+END AS CreditCategory
+FROM loan_financial_risk
+WHERE YEAR(ApplicationDate) < 2025
+GROUP BY Year(ApplicationDate), EmploymentStatus, LoanApproved, CreditScore
+ORDER BY EmploymentStatus;
